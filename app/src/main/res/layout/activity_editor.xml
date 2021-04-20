@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    tools:context=".EditorActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
+
+        <TextView
+            android:text = "Name"
+            style="@style/CategoryStyle"/>
+
+        <EditText
+           android:id="@+id/edit_item_name"
+            android:hint="name"
+            android:inputType="textCapWords"
+            style="@style/EditorFieldStyle"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:text = "Quantity"
+            android:id="@+id/quantity"
+            android:paddingTop="16dp"
+            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:textColor="@color/accent"
+            android:fontFamily="sans-serif-medium"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+        <TextView
+            android:id="@+id/number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginLeft="140dp"
+            android:layout_centerVertical="true"
+            android:text="100"/>
+
+        <Button
+            android:id="@+id/plus_button"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_toLeftOf="@id/number"
+            android:layout_toEndOf="@+id/quantity"
+            android:layout_toRightOf="@id/quantity"
+            android:text="+" />
+        <Button
+            android:id="@+id/minus_button"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/number"
+            android:text="-"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:text = "Increase by quantity: "
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="100dp" />
+
+        <EditText
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/increase_by_quantity"
+            android:hint="Enter a number"
+            android:textSize="15sp"
+            android:inputType="number" />
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:text = "Price"
+            android:id="@+id/price"
+            android:paddingTop="16dp"
+            android:layout_height="30dp"
+            android:layout_width="100dp"
+            android:textColor="@color/accent"
+            android:fontFamily="sans-serif-medium"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+        <TextView
+            android:id="@+id/price_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginLeft="140dp"
+            android:layout_centerVertical="true"
+            android:text="100"/>
+
+        <Button
+            android:id="@+id/price_plus_button"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+
+
+            android:layout_toLeftOf="@id/price_number"
+            android:layout_toEndOf="@+id/price"
+            android:layout_toRightOf="@id/price"
+            android:text="+" />
+        <Button
+            android:id="@+id/price_minus_button"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/price_number"
+            android:text="-"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:text = "Increase by Price: "
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="100dp" />
+
+        <EditText
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/increase_by_price"
+            android:hint="Enter a number"
+            android:textSize="15sp"
+            android:inputType="number" />
+    </LinearLayout>
+
+</LinearLayout>
