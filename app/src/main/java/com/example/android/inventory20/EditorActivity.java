@@ -1,12 +1,17 @@
 package com.example.android.inventory20;
 
+import android.content.ContentValues;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 
 public class EditorActivity extends AppCompatActivity {
 
@@ -25,9 +30,7 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        mName = (EditText)findViewById(R.id.edit_item_name);
-        //mQuantity = findViewById(R.id.quantity);
-
+        mName = (EditText) findViewById(R.id.edit_item_name);
     }
 
     public void quantityPlus(View v){
@@ -59,7 +62,7 @@ public class EditorActivity extends AppCompatActivity {
             decrement = 10;
         }
 
-        if(decrement<quantity){
+        if(decrement<=quantity){
             quantity -= decrement;
         }
         displayQuantity(quantity);
@@ -93,7 +96,7 @@ public class EditorActivity extends AppCompatActivity {
         else{
             decrement = 10;
         }
-        if(decrement<price){
+        if(decrement<=price){
             price -= decrement;
         }
         displayPrice(price);
@@ -107,5 +110,50 @@ public class EditorActivity extends AppCompatActivity {
     public void displayPrice(int price){
         TextView quantityView = findViewById(R.id.price_display);
         quantityView.setText(String.valueOf(price));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+
+        getMenuInflater().inflate(R.menu.menu_editor,menu);
+        return true;
+    }
+
+    private void insertPet() {
+        mName = (EditText)findViewById(R.id.edit_item_name);
+
+        String nameString = mName.getText().toString().trim();
+        int mQuantity = quantity;
+        int mPrice = price;
+
+        ContentValues values = new ContentValues();
+        values.put(ItemContract.ItemEntry.COLUMN_ITEM_NAME,nameString);
+        values.put(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY,mQuantity);
+        values.put(ItemContract.ItemEntry.COLUMN_ITEM_PRICE,mPrice);
+
+        Uri newUri = getContentResolver().insert(ItemContract.ItemEntry.CONTENT_URI,values);
+
+        if(newUri == null){
+            Toast.makeText(this,"Insertion failed",Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Toast.makeText(this,"Insertion successful",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId()) {
+            case R.id.action_save:
+                insertPet();
+                finish();
+                return true;
+            case R.id.action_delete:
+                return true;
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return true;
     }
 }

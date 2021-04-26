@@ -24,7 +24,7 @@ public class CatalogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab =  findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,10 +51,11 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(ItemEntry.COLUMN_ITEM_PRICE,100);
 
         long newRowId = db.insert(ItemEntry.TABLE_NAME,null,values);
+//        Uri newUri = getContentResolver().insert(ItemEntry.CONTENT_URI,values);
     }
 
     private void displayDbInfo(){
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         String[] projection = {
                 ItemEntry._ID,
@@ -62,11 +63,9 @@ public class CatalogActivity extends AppCompatActivity {
                 ItemEntry.COLUMN_ITEM_QUANTITY,
                 ItemEntry.COLUMN_ITEM_PRICE};
 
-        Cursor cursor = db.query(
-                ItemEntry.TABLE_NAME,
+        Cursor cursor = getContentResolver().query(
+                ItemEntry.CONTENT_URI,
                 projection,
-                null,
-                null,
                 null,
                 null,
                 null);
@@ -105,7 +104,7 @@ public class CatalogActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu,menu);
+        getMenuInflater().inflate(R.menu.menu_catalog,menu);
         return true;
     }
 
