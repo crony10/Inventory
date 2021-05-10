@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.inventory20.ItemContract.ItemEntry;
@@ -70,36 +71,41 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null);
 
-        TextView displayView = (TextView)findViewById(R.id.textView);
-        try{
-            displayView.setText("The table contains " + cursor.getCount() + " entries\n");
-            displayView.append(ItemEntry._ID + " - " +
-                    ItemEntry.COLUMN_ITEM_NAME + " - " +
-                    ItemEntry.COLUMN_ITEM_QUANTITY + " - " +
-                    ItemEntry.COLUMN_ITEM_PRICE  + "\n");
+//        TextView displayView = (TextView)findViewById(R.id.textView);
+//        try{
+//            displayView.setText("The table contains " + cursor.getCount() + " entries\n");
+//            displayView.append(ItemEntry._ID + " - " +
+//                    ItemEntry.COLUMN_ITEM_NAME + " - " +
+//                    ItemEntry.COLUMN_ITEM_QUANTITY + " - " +
+//                    ItemEntry.COLUMN_ITEM_PRICE  + "\n");
+//
+//            int idColumnIndex = cursor.getColumnIndex(ItemEntry._ID);
+//            int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
+//            int quantityColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY);
+//            int priceColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_PRICE);
+//
+//
+//            while(cursor.moveToNext()) {
+//                int currentId = cursor.getInt(idColumnIndex);
+//                String currentName = cursor.getString(nameColumnIndex);
+//                String currentQuantity = cursor.getString(quantityColumnIndex);
+//                String currentPrice = cursor.getString(priceColumnIndex);
+//
+//                displayView.append("\n" + currentId + " - "+
+//                        currentName + " - " +
+//                        currentQuantity  + " - " +
+//                        currentPrice);
+//            }
+//        }
+//        finally {
+//            cursor.close();
+//        }
 
-            int idColumnIndex = cursor.getColumnIndex(ItemEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
-            int quantityColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY);
-            int priceColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_PRICE);
+        ListView itemListView = (ListView) findViewById(R.id.list);
 
+        ItemCursorAdapter adapter = new ItemCursorAdapter(this,cursor);
 
-            while(cursor.moveToNext()) {
-                int currentId = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                String currentQuantity = cursor.getString(quantityColumnIndex);
-                String currentPrice = cursor.getString(priceColumnIndex);
-
-                displayView.append("\n" + currentId + " - "+
-                        currentName + " - " +
-                        currentQuantity  + " - " +
-                        currentPrice);
-            }
-        }
-        finally {
-            cursor.close();
-        }
-
+        itemListView.setAdapter(adapter);
     }
 
     @Override
