@@ -34,8 +34,8 @@ public class ItemCursorAdapter extends CursorAdapter {
         int priceColumnIndex = cursor.getColumnIndex(ItemContract.ItemEntry.COLUMN_ITEM_PRICE);
 
         String itemName = cursor.getString(nameColumnIndex);
-        int quantity = cursor.getInt(quantityColumnIndex);
-        int price = cursor.getInt(priceColumnIndex);
+        String quantity = "Quantity: " + cursor.getString(quantityColumnIndex);
+        String price = "Price: " + cursor.getString(priceColumnIndex);
 
         Log.i(TAG, "bindView: name of the item is: " + itemName);
         Log.i(TAG, "bindView: quantity of the item is: " + quantity);
