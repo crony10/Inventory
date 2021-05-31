@@ -20,8 +20,7 @@
             style="@style/CategoryStyle"/>
 
         <EditText
-           android:id="@+id/edit_item_name"
-            android:hint="name"
+            android:id="@+id/edit_item_name"
             android:inputType="textCapWords"
             style="@style/EditorFieldStyle"/>
     </LinearLayout>

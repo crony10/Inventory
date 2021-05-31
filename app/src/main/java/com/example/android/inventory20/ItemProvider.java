@@ -62,6 +62,9 @@ public class ItemProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI "+  uri);
         }
+        
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
+
         return cursor;
     }
 
@@ -94,42 +97,77 @@ public class ItemProvider extends ContentProvider {
         if(id==-1){
             Log.e(TAG,"failed inserting a row for uri: " + uri);
         }
+
+        getContext().getContentResolver().notifyChange(uri,null);
+
         return ContentUris.withAppendedId(uri,id);
     }
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        SQLiteDatabase databse = mDbHelper.getWritableDatabase();
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
         final int match = sUriMatcher.match(uri);
 
+        int rowsDeleted;
+
         switch(match){
             case ITEM:
-                return databse.delete(ItemEntry.TABLE_NAME,selection,selectionArgs);
+                rowsDeleted = database.delete(ItemEntry.TABLE_NAME,selection,selectionArgs);
+                break;
             case ITEM_ID:
                 selection = ItemEntry._ID + "=?";
                 selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
-                return databse.delete(ItemEntry.TABLE_NAME,selection,selectionArgs);
+                rowsDeleted = database.delete(ItemEntry.TABLE_NAME,selection,selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Deletion is not supported here for "+ uri);
         }
+
+        if(rowsDeleted != 0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
+
+        return rowsDeleted;
     }
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        if(values.containsKey(ItemEntry.COLUMN_ITEM_NAME)){
+        final int match = sUriMatcher.match(uri);
+
+        switch(match){
+            case ITEM:
+                return updateItem(uri,values,selection,selectionArgs);
+            case ITEM_ID:
+                selection = ItemEntry._ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri))};
+                return updateItem(uri,values,selection,selectionArgs);
+            default:
+                throw new IllegalArgumentException("updation failed for uri: " + uri);
+        }
+    }
+
+    private int updateItem(Uri uri, ContentValues values, String selection, String[] selectionArgs){
+        if (values.containsKey(ItemEntry.COLUMN_ITEM_NAME)) {
             String name = values.getAsString(ItemEntry.COLUMN_ITEM_NAME);
-            if(name == null){
-                throw new IllegalArgumentException("Pet requires a name ");
+            if (name == null) {
+                throw new IllegalArgumentException("Pet requires a name");
             }
         }
 
-        if(values.size()==0){
+
+        if(values.size() == 0){
             return 0;
         }
 
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        return database.update(ItemEntry.TABLE_NAME,values,selection,selectionArgs);
+        int rowsUpdated = db.update(ItemEntry.TABLE_NAME,values,selection,selectionArgs);
+
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsUpdated;
     }
 }

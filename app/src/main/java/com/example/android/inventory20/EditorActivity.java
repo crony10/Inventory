@@ -1,19 +1,41 @@
 package com.example.android.inventory20;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
-public class EditorActivity extends AppCompatActivity {
+import com.example.android.inventory20.ItemContract;
+import com.example.android.inventory20.ItemContract.ItemEntry;
+import com.example.android.inventory20.ItemCursorAdapter;
+import com.example.android.inventory20.R;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.app.LoaderManager;
+
+public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private ItemDbHelper mDbHelper;
+
+    private static final int EXISTING_ITEM_LOADER = 0;
 
     private EditText mName;
 
@@ -25,134 +47,349 @@ public class EditorActivity extends AppCompatActivity {
 
     private int price = 100;
 
+    private Uri mCurrentItemUri;
+    
+    private boolean mItemHasChanged = false;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
         mName = (EditText) findViewById(R.id.edit_item_name);
+
+        Intent intent = getIntent();
+        mCurrentItemUri = intent.getData();
+
+        if (mCurrentItemUri == null) {
+            setTitle("Add an item");
+
+            invalidateOptionsMenu();
+        } else {
+            setTitle("Edit an item");
+
+            getLoaderManager().initLoader(EXISTING_ITEM_LOADER,null,this);
+        }
+        mName = (EditText) findViewById(R.id.edit_item_name);
+        Button plusQuantity = findViewById(R.id.plus_button);
+        Button minusQuantity = findViewById(R.id.minus_button);
+        Button plusPrice = findViewById(R.id.price_plus_button);
+        Button minusPrice = findViewById(R.id.price_minus_button);
+
+        mName.setOnTouchListener(mTouchListener);
+//        mPrice.setOnTouchListener(mTouchListener);
+//        mQuantity.setOnTouchListener(mTouchListener);\
+        plusQuantity.setOnTouchListener(mTouchListener);
+        minusQuantity.setOnTouchListener(mTouchListener);
+        plusPrice.setOnTouchListener(mTouchListener);
+        minusPrice.setOnTouchListener(mTouchListener);
+
     }
 
-    public void quantityPlus(View v){
+    public void quantityPlus(View v) {
         int increment;
         mQuantity = (EditText) findViewById(R.id.increase_by_quantity);
         String incrementString = "";
-        incrementString  = mQuantity.getText().toString();
+        incrementString = mQuantity.getText().toString();
 
-        if(!incrementString.equals("")) {
+        if (!incrementString.equals("")) {
             increment = Integer.parseInt(incrementString);
-        }
-        else{
+        } else {
             increment = 10;
         }
         quantity += increment;
         displayQuantity(quantity);
     }
 
-    public void quantityMinus(View v){
+    public void quantityMinus(View v) {
         int decrement;
         mQuantity = (EditText) findViewById(R.id.increase_by_quantity);
         String decrementString = "";
-        decrementString  = mQuantity.getText().toString();
+        decrementString = mQuantity.getText().toString();
 
-        if(!decrementString.equals("")) {
+        if (!decrementString.equals("")) {
             decrement = Integer.parseInt(decrementString);
-        }
-        else{
+        } else {
             decrement = 10;
         }
 
-        if(decrement<=quantity){
+        if (decrement <= quantity) {
             quantity -= decrement;
         }
         displayQuantity(quantity);
     }
 
-    public void pricePlus(View v){
+    public void pricePlus(View v) {
         int increment;
         mPrice = (EditText) findViewById(R.id.increase_by_price);
         String incrementString = "";
-        incrementString  = mPrice.getText().toString();
+        incrementString = mPrice.getText().toString();
 
-        if(!incrementString.equals("")) {
+        if (!incrementString.equals("")) {
             increment = Integer.parseInt(incrementString);
-        }
-        else{
+        } else {
             increment = 10;
         }
         price += increment;
         displayPrice(price);
     }
 
-    public void priceMinus(View v){
+    public void priceMinus(View v) {
         int decrement;
         mPrice = (EditText) findViewById(R.id.increase_by_price);
         String decrementString = "";
-        decrementString  = mPrice.getText().toString();
+        decrementString = mPrice.getText().toString();
 
-        if(!decrementString.equals("")) {
+        if (!decrementString.equals("")) {
             decrement = Integer.parseInt(decrementString);
-        }
-        else{
+        } else {
             decrement = 10;
         }
-        if(decrement<=price){
+        if (decrement <= price) {
             price -= decrement;
         }
         displayPrice(price);
     }
 
-    public void displayQuantity(int quantity){
+    public void displayQuantity(int quantity) {
         TextView quantityView = findViewById(R.id.number_display);
         quantityView.setText(String.valueOf(quantity));
     }
 
-    public void displayPrice(int price){
-        TextView quantityView = findViewById(R.id.price_display);
-        quantityView.setText(String.valueOf(price));
+    public void displayPrice(int price) {
+        TextView priceView = findViewById(R.id.price_display);
+        priceView.setText(String.valueOf(price));
+    }
+
+    public void sellButtonDecrease(){
+        price -= 1;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-
-        getMenuInflater().inflate(R.menu.menu_editor,menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_editor, menu);
         return true;
     }
 
-    private void insertPet() {
-        mName = (EditText)findViewById(R.id.edit_item_name);
+    private void saveItem() {
 
-        String nameString = mName.getText().toString().trim();
-        int mQuantity = quantity;
-        int mPrice = price;
+        if(mCurrentItemUri == null) {
+            String nameString = mName.getText().toString().trim();
+            if(TextUtils.isEmpty(nameString)){
+                return;
+            }
+            int mQuantity = quantity;
+            int mPrice = price;
 
-        ContentValues values = new ContentValues();
-        values.put(ItemContract.ItemEntry.COLUMN_ITEM_NAME,nameString);
-        values.put(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY,mQuantity);
-        values.put(ItemContract.ItemEntry.COLUMN_ITEM_PRICE,mPrice);
+            ContentValues values = new ContentValues();
+            values.put(ItemContract.ItemEntry.COLUMN_ITEM_NAME, nameString);
+            values.put(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY, mQuantity);
+            values.put(ItemContract.ItemEntry.COLUMN_ITEM_PRICE, mPrice);
 
-        Uri newUri = getContentResolver().insert(ItemContract.ItemEntry.CONTENT_URI,values);
+            Uri newUri = getContentResolver().insert(ItemContract.ItemEntry.CONTENT_URI, values);
 
-        if(newUri == null){
-            Toast.makeText(this,"Insertion failed",Toast.LENGTH_SHORT).show();
+            if (newUri == null) {
+                Toast.makeText(this, "Insertion failed", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Insertion successful", Toast.LENGTH_SHORT).show();
+            }
         }
         else{
-            Toast.makeText(this,"Insertion successful",Toast.LENGTH_SHORT).show();
+            String nameString = mName.getText().toString().trim();
+            if(TextUtils.isEmpty(nameString)){
+                return;
+            }
+
+            int mQuantity = quantity;
+            int mPrice = price;
+
+            ContentValues values = new ContentValues();
+            values.put(ItemContract.ItemEntry.COLUMN_ITEM_NAME, nameString);
+            values.put(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY, mQuantity);
+            values.put(ItemContract.ItemEntry.COLUMN_ITEM_PRICE, mPrice);
+
+            int rowsAffected = getContentResolver().update(mCurrentItemUri,values,null,null);
+
+            if (rowsAffected == 0) {
+                Toast.makeText(this, "insertion failed",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "insertion successful and rows affected : "+ rowsAffected,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void deleteItem(){
+        if(mCurrentItemUri != null){
+            int rowsDeleted = getContentResolver().delete(mCurrentItemUri,null,null);
+
+            if (rowsDeleted == 0) {
+                Toast.makeText(this, "Deletion failed",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Deletion successful and rows affected : "+ rowsDeleted,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_save:
+                saveItem();
+                finish();
+                return true;
+            case R.id.action_delete:
+                showDeleteConfirmationDialog();
+                return true;
+            case android.R.id.home:
+                if (!mItemHasChanged) {
+                    NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                    return true;
+                }
+
+                DialogInterface.OnClickListener discardButtonClickListener =
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // User clicked "Discard" button, navigate to parent activity.
+                                NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                            }
+                        };
+                showUnsavedChangesDialog(discardButtonClickListener);
+                return true;
+        }
+        return true;
+    }
+
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            mItemHasChanged = true;
+            return false;
+        }
+    };
+
+    private void showUnsavedChangesDialog(
+            DialogInterface.OnClickListener discardButtonClickListener){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to exit the item editor?");
+        builder.setPositiveButton("Discard",discardButtonClickListener);
+        builder.setNegativeButton("Keep", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                if(dialog != null){
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showDeleteConfirmationDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you really want to delete this pet?: ");
+        builder.setPositiveButton("delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteItem();
+            }
+        });
+        builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(dialog != null){
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    @Override
+    public void onBackPressed(){
+        if(!mItemHasChanged){
+            super.onBackPressed();
+            return;
+        }
+
+        DialogInterface.OnClickListener discardButtonClickListener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // User clicked "Discard" button, close the current activity.
+                        finish();
+                    }
+                };
+
+        showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+                ItemEntry.COLUMN_ITEM_NAME,
+                ItemEntry.COLUMN_ITEM_PRICE,
+                ItemEntry.COLUMN_ITEM_QUANTITY
+        };
+        return new CursorLoader (this,
+                mCurrentItemUri,
+                projection,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (cursor == null || cursor.getCount() < 1) {
+            return;
+        }
+
+        if(cursor.moveToFirst()){
+            int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
+            int priceColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_PRICE);
+            int quantityColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY);
+
+            String name = cursor.getString(nameColumnIndex);
+            String price = cursor.getString(priceColumnIndex);
+            String quantity = cursor.getString(quantityColumnIndex);
+
+            mName.setText(name);
+
+            TextView quantityView = findViewById(R.id.number_display);
+            quantityView.setText(String.valueOf(quantity));
+
+            TextView priceView = findViewById(R.id.price_display);
+            priceView.setText(String.valueOf(price));
         }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch(item.getItemId()) {
-            case R.id.action_save:
-                insertPet();
-                finish();
-                return true;
-            case R.id.action_delete:
-                return true;
-            case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mName.setText("");
+
+        TextView quantityView = findViewById(R.id.number_display);
+        quantityView.setText(String.valueOf(0));
+
+        TextView priceView = findViewById(R.id.price_display);
+        priceView.setText(String.valueOf(0));
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu){
+        super.onPrepareOptionsMenu(menu);
+
+        if(mCurrentItemUri == null){
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
         }
         return true;
     }
