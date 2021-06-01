@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Inventory2.0</string>
+    <string name="price_100">price: 100</string>
+    <string name="quantity">quantity</string>
+    <string name="name">Name</string>
+    <string name="quantity_textView">Quantity</string>
+    <string name="increase_decrease_by_quantity">Increase/Decrease by quantity:</string>
 </resources>

@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 public final class ItemContract {
 
     public static final String CONTENT_AUTHORITY = "com.example.android.inventory20";
-//
+
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://"+ CONTENT_AUTHORITY);
 
     public static final String PATH_ITEM = "inventory";
@@ -28,7 +28,6 @@ public final class ItemContract {
 
         public static final String _ID = BaseColumns._ID;
         public static final String COLUMN_ITEM_NAME =  "name";
-        public static final String COLUMN_ITEM_PRICE =  "price";
         public static final String COLUMN_ITEM_QUANTITY =  "quantity";
     }
 }

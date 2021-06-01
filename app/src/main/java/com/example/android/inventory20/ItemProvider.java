@@ -143,7 +143,7 @@ public class ItemProvider extends ContentProvider {
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri))};
                 return updateItem(uri,values,selection,selectionArgs);
             default:
-                throw new IllegalArgumentException("updation failed for uri: " + uri);
+                throw new IllegalArgumentException("Updation failed for uri: " + uri);
         }
     }
 
@@ -154,8 +154,6 @@ public class ItemProvider extends ContentProvider {
                 throw new IllegalArgumentException("Pet requires a name");
             }
         }
-
-
         if(values.size() == 0){
             return 0;
         }

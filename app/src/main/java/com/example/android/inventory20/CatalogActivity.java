@@ -3,18 +3,13 @@ package com.example.android.inventory20;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
 import android.content.Loader;
-
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,13 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.inventory20.ItemContract.ItemEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.List;
+
 
 
 public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -93,68 +87,24 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         ContentValues values = new ContentValues();
         values.put(ItemEntry.COLUMN_ITEM_NAME,"burette");
         values.put(ItemEntry.COLUMN_ITEM_QUANTITY,10);
-        values.put(ItemEntry.COLUMN_ITEM_PRICE,100);
 
-//        long newRowId = db.insert(ItemEntry.TABLE_NAME,null,values);
         Uri newUri = getContentResolver().insert(ItemEntry.CONTENT_URI,values);
     }
-
-//    private void displayDbInfo(){
-//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-//
-//        String[] projection = {
-//                ItemEntry._ID,
-//                ItemEntry.COLUMN_ITEM_NAME,
-//                ItemEntry.COLUMN_ITEM_QUANTITY,
-//                ItemEntry.COLUMN_ITEM_PRICE};
-//
-//        Cursor cursor = getContentResolver().query(
-//                ItemEntry.CONTENT_URI,
-//                projection,
-//                null,
-//                null,
-//                null);
-//
-////        TextView displayView = (TextView)findViewById(R.id.textView);
-//        try{
-////            displayView.setText("The table contains " + cursor.getCount() + " entries\n");
-//            Toast.makeText(this, "total entries are: "+ cursor.getCount(), Toast.LENGTH_SHORT).show();
-////            displayView.append(ItemEntry._ID + " - " +
-////                    ItemEntry.COLUMN_ITEM_NAME + " - " +
-////                    ItemEntry.COLUMN_ITEM_QUANTITY + " - " +
-////                    ItemEntry.COLUMN_ITEM_PRICE  + "\n");
-//
-////            int idColumnIndex = cursor.getColumnIndex(ItemEntry._ID);
-////            int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
-////            int quantityColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY);
-////            int priceColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_PRICE);
-////
-////
-////            while(cursor.moveToNext()) {
-////                int currentId = cursor.getInt(idColumnIndex);
-////                String currentName = cursor.getString(nameColumnIndex);
-////                String currentQuantity = cursor.getString(quantityColumnIndex);
-////                String currentPrice = cursor.getString(priceColumnIndex);
-////
-////                Toast.makeText(this, "id is: " + currentId + " name: " + currentName + " quantity:"
-////                        + currentQuantity + " price: "+ currentPrice, Toast.LENGTH_SHORT).show();
-////            }
-//        }
-//        finally {
-//            cursor.close();
-//        }
-//
-////        ListView itemListView = (ListView) findViewById(R.id.list);
-////
-////        ItemCursorAdapter adapter = new ItemCursorAdapter(this,cursor);
-////
-////        itemListView.setAdapter(adapter);
-//    }
 
     private void deleteAllItem(){
         int rowsDeleted = getContentResolver().delete(ItemEntry.CONTENT_URI,null,null);
         Toast.makeText(this, "All the rows are successfully deleted", Toast.LENGTH_SHORT).show();
         Log.i(TAG, "deleteAllItem: all rows deleted");
+    }
+
+    private void orderMore(){
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:"));
+        intent.putExtra(Intent.EXTRA_SUBJECT,"Item order for: ");
+
+        if(intent.resolveActivity(getPackageManager()) != null){
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -172,6 +122,9 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             case R.id.delete_all_entries:
                 deleteAllItem();
                 return true;
+            case R.id.order_more:
+                orderMore();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -183,8 +136,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 String[] projection = {
                         ItemEntry._ID,
                         ItemEntry.COLUMN_ITEM_NAME,
-                        ItemEntry.COLUMN_ITEM_QUANTITY,
-                        ItemEntry.COLUMN_ITEM_PRICE};
+                        ItemEntry.COLUMN_ITEM_QUANTITY};
                 return new CursorLoader(
                         this,
                         ItemEntry.CONTENT_URI,

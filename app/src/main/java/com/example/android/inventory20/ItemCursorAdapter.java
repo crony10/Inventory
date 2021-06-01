@@ -27,22 +27,14 @@ public class ItemCursorAdapter extends CursorAdapter {
 
         TextView nameTextView = (TextView) view.findViewById(R.id.name);
         TextView quantityTextView = (TextView)view.findViewById(R.id.current_quantity);
-        TextView priceTextView = (TextView)view.findViewById(R.id.current_price);
 
         int nameColumnIndex = cursor.getColumnIndex(ItemContract.ItemEntry.COLUMN_ITEM_NAME);
         int quantityColumnIndex = cursor.getColumnIndex(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY);
-        int priceColumnIndex = cursor.getColumnIndex(ItemContract.ItemEntry.COLUMN_ITEM_PRICE);
 
         String itemName = cursor.getString(nameColumnIndex);
         String quantity = "Quantity: " + cursor.getString(quantityColumnIndex);
-        String price = "Price: " + cursor.getString(priceColumnIndex);
-
-        Log.i(TAG, "bindView: name of the item is: " + itemName);
-        Log.i(TAG, "bindView: quantity of the item is: " + quantity);
-        Log.i(TAG, "bindView: price of the item is: " + price);
 
         nameTextView.setText(itemName);
         quantityTextView.setText(quantity);
-        priceTextView.setText(price);
     }
 }

@@ -5,8 +5,6 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,17 +14,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
-import com.example.android.inventory20.ItemContract;
 import com.example.android.inventory20.ItemContract.ItemEntry;
-import com.example.android.inventory20.ItemCursorAdapter;
-import com.example.android.inventory20.R;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.app.LoaderManager;
@@ -40,8 +33,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mName;
 
     private EditText mQuantity;
-
-    private EditText mPrice;
 
     private int quantity = 100;
 
@@ -73,16 +64,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mName = (EditText) findViewById(R.id.edit_item_name);
         Button plusQuantity = findViewById(R.id.plus_button);
         Button minusQuantity = findViewById(R.id.minus_button);
-        Button plusPrice = findViewById(R.id.price_plus_button);
-        Button minusPrice = findViewById(R.id.price_minus_button);
 
         mName.setOnTouchListener(mTouchListener);
 //        mPrice.setOnTouchListener(mTouchListener);
 //        mQuantity.setOnTouchListener(mTouchListener);\
         plusQuantity.setOnTouchListener(mTouchListener);
         minusQuantity.setOnTouchListener(mTouchListener);
-        plusPrice.setOnTouchListener(mTouchListener);
-        minusPrice.setOnTouchListener(mTouchListener);
 
     }
 
@@ -119,50 +106,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         displayQuantity(quantity);
     }
 
-    public void pricePlus(View v) {
-        int increment;
-        mPrice = (EditText) findViewById(R.id.increase_by_price);
-        String incrementString = "";
-        incrementString = mPrice.getText().toString();
-
-        if (!incrementString.equals("")) {
-            increment = Integer.parseInt(incrementString);
-        } else {
-            increment = 10;
-        }
-        price += increment;
-        displayPrice(price);
-    }
-
-    public void priceMinus(View v) {
-        int decrement;
-        mPrice = (EditText) findViewById(R.id.increase_by_price);
-        String decrementString = "";
-        decrementString = mPrice.getText().toString();
-
-        if (!decrementString.equals("")) {
-            decrement = Integer.parseInt(decrementString);
-        } else {
-            decrement = 10;
-        }
-        if (decrement <= price) {
-            price -= decrement;
-        }
-        displayPrice(price);
-    }
-
     public void displayQuantity(int quantity) {
         TextView quantityView = findViewById(R.id.number_display);
         quantityView.setText(String.valueOf(quantity));
-    }
-
-    public void displayPrice(int price) {
-        TextView priceView = findViewById(R.id.price_display);
-        priceView.setText(String.valueOf(price));
-    }
-
-    public void sellButtonDecrease(){
-        price -= 1;
     }
 
     @Override
@@ -179,12 +125,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 return;
             }
             int mQuantity = quantity;
-            int mPrice = price;
 
             ContentValues values = new ContentValues();
             values.put(ItemContract.ItemEntry.COLUMN_ITEM_NAME, nameString);
             values.put(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY, mQuantity);
-            values.put(ItemContract.ItemEntry.COLUMN_ITEM_PRICE, mPrice);
 
             Uri newUri = getContentResolver().insert(ItemContract.ItemEntry.CONTENT_URI, values);
 
@@ -201,12 +145,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
 
             int mQuantity = quantity;
-            int mPrice = price;
 
             ContentValues values = new ContentValues();
             values.put(ItemContract.ItemEntry.COLUMN_ITEM_NAME, nameString);
             values.put(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY, mQuantity);
-            values.put(ItemContract.ItemEntry.COLUMN_ITEM_PRICE, mPrice);
 
             int rowsAffected = getContentResolver().update(mCurrentItemUri,values,null,null);
 
@@ -293,7 +235,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private void showDeleteConfirmationDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Do you really want to delete this pet?: ");
+        builder.setMessage("Do you really want to delete this pet?");
         builder.setPositiveButton("delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -328,7 +270,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                         finish();
                     }
                 };
-
         showUnsavedChangesDialog(discardButtonClickListener);
     }
 
@@ -336,7 +277,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {
                 ItemEntry.COLUMN_ITEM_NAME,
-                ItemEntry.COLUMN_ITEM_PRICE,
                 ItemEntry.COLUMN_ITEM_QUANTITY
         };
         return new CursorLoader (this,
@@ -355,20 +295,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         if(cursor.moveToFirst()){
             int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
-            int priceColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_PRICE);
             int quantityColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY);
 
             String name = cursor.getString(nameColumnIndex);
-            String price = cursor.getString(priceColumnIndex);
             String quantity = cursor.getString(quantityColumnIndex);
 
             mName.setText(name);
 
             TextView quantityView = findViewById(R.id.number_display);
             quantityView.setText(String.valueOf(quantity));
-
-            TextView priceView = findViewById(R.id.price_display);
-            priceView.setText(String.valueOf(price));
         }
     }
 
@@ -378,9 +313,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         TextView quantityView = findViewById(R.id.number_display);
         quantityView.setText(String.valueOf(0));
-
-        TextView priceView = findViewById(R.id.price_display);
-        priceView.setText(String.valueOf(0));
     }
     
     @Override
