@@ -4,11 +4,15 @@
 
     <item
         android:id="@+id/insert_dummy_entry"
-        android:title="insert dummy entry">
+        android:title="Insert dummy entry">
     </item>
 
     <item
         android:id="@+id/delete_all_entries"
-        android:title="delete all entries">
+        android:title="Delete all entries">
     </item>
+
+    <item
+        android:id="@+id/order_more"
+        android:title="Order more"/>
 </menu>
